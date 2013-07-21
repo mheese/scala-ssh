@@ -39,3 +39,17 @@ object PublicKeyLogin {
   def apply(user: String, passProducer: PasswordProducer, keyfileLocations: List[String]): PublicKeyLogin =
     PublicKeyLogin(user, Some(passProducer), keyfileLocations)
 }
+
+case class DirectPublicKeyLogin(
+  user: String,
+  passProducer: Option[PasswordProducer],
+  privateKey: String,
+  publicKey: Option[String]
+) extends SshLogin
+
+object DirectPublicKeyLogin {
+  def apply(user: String, privateKey: String): DirectPublicKeyLogin = DirectPublicKeyLogin(user, None, privateKey, None)
+  def apply(user: String, pp: PasswordProducer, privateKey: String): DirectPublicKeyLogin = DirectPublicKeyLogin(user, Some(pp), privateKey, None)
+  def apply(user: String, privateKey: String, publicKey: String): DirectPublicKeyLogin = DirectPublicKeyLogin(user, None, privateKey, Some(publicKey))
+  def apply(user: String, pp: PasswordProducer, privateKey: String, publicKey: String): DirectPublicKeyLogin = DirectPublicKeyLogin(user, Some(pp), privateKey, Some(publicKey))
+}

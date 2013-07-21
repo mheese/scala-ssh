@@ -100,6 +100,11 @@ class SshClient(val config: HostConfig) {
           client.authPublickey(user, keyProviders(keyfileLocations, passProducer.getOrElse(null)): _*)
           client
         }
+      case DirectPublicKeyLogin(user, passProducer, privateKey, publicKey) =>
+        protect("Could not authenticate with direct PrivateKey to") {
+          client.authPublickey(user, List(client.loadKeys(privateKey, publicKey.getOrElse(null), passProducer.getOrElse(null))): _*)
+          client
+        }
     }
   }
 

@@ -56,25 +56,35 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
   def rawLines(host: String): Validated[(String, TraversableOnce[String])]
 
   def apply(host: String) = {
-    rawLines(host).right.flatMap { case (source, lines) =>
-    splitToMap(lines, source).right.flatMap { settings =>
-    login(settings, source).right.flatMap { login =>
-    optIntSetting("port", settings, source).right.flatMap { port =>
-    optIntSetting("connect-timeout", settings, source).right.flatMap { connectTimeout =>
-    optIntSetting("connection-timeout", settings, source).right.flatMap { connectionTimeout =>
-    optIntSetting("command-timeout", settings, source).right.flatMap { commandTimeout =>
-    optBoolSetting("enable-compression", settings, source).right.flatMap { enableCompression =>
-    setting("fingerprint", settings, source).right.map(forFingerprint).left.flatMap(_ => KnownHosts).right.map { verifier =>
-    HostConfig(
-      login,
-      hostName = setting("host-name", settings, source).right.toOption.getOrElse(host),
-      port = port.getOrElse(22),
-      connectTimeout = connectTimeout,
-      connectionTimeout = connectionTimeout,
-      commandTimeout = commandTimeout,
-      enableCompression = enableCompression.getOrElse(false),
-      hostKeyVerifier = verifier
-    )}}}}}}}}}
+    rawLines(host).right.flatMap {
+      case (source, lines) =>
+        splitToMap(lines, source).right.flatMap { settings =>
+          login(settings, source).right.flatMap { login =>
+            optIntSetting("port", settings, source).right.flatMap { port =>
+              optIntSetting("connect-timeout", settings, source).right.flatMap { connectTimeout =>
+                optIntSetting("connection-timeout", settings, source).right.flatMap { connectionTimeout =>
+                  optIntSetting("command-timeout", settings, source).right.flatMap { commandTimeout =>
+                    optBoolSetting("enable-compression", settings, source).right.flatMap { enableCompression =>
+                      setting("fingerprint", settings, source).right.map(forFingerprint).left.flatMap(_ => KnownHosts).right.map { verifier =>
+                        HostConfig(
+                          login,
+                          hostName = setting("host-name", settings, source).right.toOption.getOrElse(host),
+                          port = port.getOrElse(22),
+                          connectTimeout = connectTimeout,
+                          connectionTimeout = connectionTimeout,
+                          commandTimeout = commandTimeout,
+                          enableCompression = enableCompression.getOrElse(false),
+                          hostKeyVerifier = verifier
+                        )
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    }
   }
 
   private def login(settings: Map[String, String], source: String) = {
